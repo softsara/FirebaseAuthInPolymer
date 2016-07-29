@@ -1,0 +1,167 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<script src="https://www.gstatic.com/firebasejs/3.2.1/firebase.js"></script>
+
+<dom-module id="my-view1">
+
+  <template>
+
+    <style>
+      :host {
+        display: block;
+        padding: 10px;
+      }
+      .card {
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        margin: 24px;
+        border-radius: 5px;
+        background-color: #fff;
+        color: #757575;
+      }
+      .circle {
+        display: inline-block;
+        height: 64px;
+        width: 64px;
+        border-radius: 50%;
+        background: #ddd;
+        line-height: 64px;
+        font-size: 30px;
+        color: #555;
+        text-align: center;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 16px 0;
+        color: #212121;
+      }
+      .hide
+      {
+          display: none;
+      }
+    </style>
+
+    <div class="card">
+      <div class="circle">1</div>
+	  <paper-input id="txtEmail" label="Email" type="email" required></paper-input>
+	  <paper-input id="txtPassword" label="Password" type="password" required></paper-input>
+	  <paper-button id="btnLogIn" raised>Log In</paper-button>
+	  <paper-button id="btnGoogleSignIn" raised>Google Sign In</paper-button>
+	  <paper-button id="btnFacebookSignIn" raised>Facebook Sign In</paper-button>
+	  <paper-button id="btnSignUp" raised>Sign Up</paper-button>
+	  <paper-button id="btnLogOut" raised>Log Out</paper-button>
+    </div>
+	
+  </template>
+
+  <script>
+
+      Polymer({
+          is: 'my-view1',
+          ready: function () {
+              // Initialize Firebase
+              var config = {
+                  apiKey: "apiKey",
+				  authDomain: "projectId.firebaseapp.com",
+				  databaseURL: "https://databaseName.firebaseio.com",
+				  storageBucket: "bucket.appspot.com",
+              };
+              firebase.initializeApp(config);
+
+              console.log(this.$.txtEmail);
+              // Get Elements
+              const txtEmail = this.$.txtEmail;
+              const txtPassword = this.$.txtPassword;
+              const btnLogIn = this.$.btnLogIn;
+              const btnGoogleSignIn = this.$.btnGoogleSignIn;
+              const btnFacebookSignIn = this.$.btnFacebookSignIn;
+              const btnSignUp = this.$.btnSignUp;
+              const btnLogOut = this.$.btnLogOut;
+
+              // Add Log In event
+              btnLogIn.addEventListener('click', e => {
+                  const email = txtEmail.value;
+                  const pass = txtPassword.value;
+                  const auth = firebase.auth();
+
+                  const promise = auth.signInWithEmailAndPassword(email, pass);
+                  promise
+                      //.then(user => console.log(user))
+                      .catch(e => console.log(e.message));
+              });
+
+              // Add Google Sign In event
+              btnGoogleSignIn.addEventListener('click', e => {
+                  const provider = new firebase.auth.GoogleAuthProvider();
+                  provider.addScope('https://www.googleapis.com/auth/plus.login');
+                  const auth = firebase.auth();
+
+                  auth.signInWithPopup(provider).then(result => {
+                      // result.user gives you a Google signed-in user
+                      console.log(result);
+                  }).catch(e => {
+                      // Handle Errors here.
+                      console.log(e.message)
+                  });
+              });
+
+              // Add Google Sign In event
+              btnFacebookSignIn.addEventListener('click', e => {
+                  const provider = new firebase.auth.FacebookAuthProvider();
+                  provider.addScope('user_birthday');
+                  const auth = firebase.auth();
+
+                  auth.signInWithPopup(provider).then(result => {
+                      // result.user gives you a Google signed-in user
+                      console.log(result);
+                  }).catch(e => {
+                      // Handle Errors here.
+                      console.log(e.message)
+                  });
+              });
+              // Add Log Out event
+              btnLogOut.addEventListener('click', e => {
+                  firebase.auth().signOut();
+              });
+
+              // Add Sign Up event
+              btnSignUp.addEventListener('click', e => {
+                  const email = txtEmail.value;
+                  const pass = txtPassword.value;
+                  const auth = firebase.auth();
+
+                  const promise = auth.createUserWithEmailAndPassword(email, pass);
+                  promise
+                      .then(user => console.log(user))
+                      .catch(e => console.log(e.message));
+              });
+
+              // Add Auth State Changed event listener
+              firebase.auth().onAuthStateChanged(user => {
+                  if (user) {
+                      console.log(user);
+                      btnLogOut.classList.remove('hide');
+                  } else {
+                      console.log('not logged in');
+                      btnLogOut.classList.add('hide');
+                  }
+              });
+          }
+      });
+
+
+
+  </script>
+  <!--<script src="scripts/app.js"></script>-->
+</dom-module>
